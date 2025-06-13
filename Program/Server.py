@@ -18,7 +18,7 @@ CSV_LOG = "log_validasi_server.csv" # Nama file log CSV
 # Panjang MAC untuk tiap algoritma
 mac_lengths = {
     "HMAC-SHA256": 32, # Panjang output HMAC-SHA256
-    "RIPEMD-160": 20, # Panjang output RIPEMD-160
+    "RIPEMD-160": 32, # Panjang output RIPEMD-160
     "AES-CMAC": 16 # Panjang output AES-CMAC
 }
 
@@ -29,7 +29,8 @@ def generate_mac(data, algo):
     elif algo == "RIPEMD-160":
         h = RIPEMD160.new()
         h.update(data)
-        return h.digest() # RIPEMD-160
+        digest = h.digest()
+        return digest + b'\x00' * (32 - len(digest))  # pad to 256-bit
     elif algo == "AES-CMAC":
         cobj = CMAC.new(KEY, ciphermod=AES)
         cobj.update(data)
