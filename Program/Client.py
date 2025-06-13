@@ -9,7 +9,7 @@ from Crypto.Hash import CMAC
 from Crypto.Cipher import AES
 
 # Konfigurasi
-HOST = '127.0.0.1' # Ganti dengan alamat server yang sesuai
+HOST = '192.168.1.19' # Ganti dengan alamat server yang sesuai
 PORT = 5000 
 KEY = b'0123456789ABCDEF0123456789ABCDEF' # Kunci untuk HMAC dan AES-CMAC
 CSV_FILENAME = 'mac_benchmark_log.csv'
@@ -19,15 +19,16 @@ algorithms_list = ['HMAC-SHA256', 'RIPEMD-160', 'AES-CMAC'] # Daftar algoritma y
 # Fungsi generate MAC
 def compute_mac(data, algo):
     if algo == 'HMAC-SHA256':
-        return hmac.new(KEY, data, hashlib.sha256).digest() # HMAC dengan SHA-256
+        return hmac.new(KEY, data, hashlib.sha256).digest()  # 256-bit
     elif algo == 'RIPEMD-160':
         h = RIPEMD160.new()
         h.update(data)
-        return h.digest() # RIPEMD-160
+        digest = h.digest() # 160-bit
+        return digest + b'\x00' * (32 - len(digest))  # Pad to 256-bit
     elif algo == 'AES-CMAC':
         c = CMAC.new(KEY, ciphermod=AES)
         c.update(data)
-        return c.digest() # AES-CMAC
+        return c.digest()  # 128-bit (default)
     else:
         raise ValueError(f"Unknown algorithm: {algo}")
 
